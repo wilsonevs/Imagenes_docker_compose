@@ -1,0 +1,61 @@
+version: "3.8"
+services:
+  # Generar key de jenkins-> docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+  jenkins:
+    container_name: jenkins
+  #  image: jenkins/jenkins:lts-jdk11
+    build: 
+      context: ./jenkins_home
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - ./jenkins_home:/var/jenkins_home:rw
+    networks:
+      jenkins_network:
+        aliases:
+          - jenkins_host
+
+  redis-master:
+    image: 'bitnami/redis:latest'
+    expose:
+      - '6379'
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=my_master_password
+
+  redis-replica:  
+    image: 'bitnami/redis:latest'
+    expose:
+      - '6379'
+    depends_on:
+      - redis-master
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PORT_NUMBER=6379
+      - REDIS_MASTER_PASSWORD=my_master_password
+      - REDIS_PASSWORD=my_slave_password
+
+volumes:
+  schemas: {}
+networks:
+  mysql_network:
+    name: mysql_net
+    driver: bridge
+  jenkins_network:
+    name: jenkins_net
+    driver: bridge
+
+ 
+
+# Instalar-> docker-compose up -d
+# Estado-> docker-compose ps -a
+# Eliminar contenedor-> docker rm -fv #delcontenedor
+# Eliminar la red, pero no el volumen-> docker-compose down
+# Ver volumen-> docker volume ls
+# Ubicación de carpeta-> pwd
+# Detiene-> docker-compose stop
+# Arranca de nuevo-> docker-compose start
