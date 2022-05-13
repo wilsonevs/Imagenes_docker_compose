@@ -38,7 +38,15 @@ services:
       - REDIS_MASTER_PORT_NUMBER=6379
       - REDIS_MASTER_PASSWORD=my_master_password
       - REDIS_PASSWORD=my_slave_password
-
+#Link https://github.com/mock-server/mockserver/blob/master/docker/README.md
+  mockServer:
+    image: mockserver/mockserver:5.13.2
+    ports:
+      - 1080:1090
+    environment:
+      MOCKSERVER_MAX_EXPECTATIONS: 100
+      MOCKSERVER_MAX_HEADER_SIZE: 8192
+      
 volumes:
   schemas: {}
 networks:
